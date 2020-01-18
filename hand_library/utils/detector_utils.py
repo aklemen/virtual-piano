@@ -63,10 +63,23 @@ class Drawer:
     def draw_keyboard(self, frame, im_width, im_height):
         unit_w = im_width/self.num_keys
         unit_h = im_height/2
+
+        overlay = frame.copy()
+        alpha = 0.4
+        image_with_keys = None
+
         for i in range(self.num_keys):
+            if i % 2 == 0:
+                color = (0, 0, 0, 0.3)
+            else:
+                color = (255, 255, 255, 0.3)
             t1 = (int(unit_w*i), int(unit_h))
             t2 = (int(unit_w*(i+1)), int(im_height))
-            cv2.rectangle(frame, t1, t2, (77, 255, 9), 3, 1)
+
+            cv2.rectangle(frame, t1, t2, color, cv2.FILLED)
+            image_with_keys = cv2.addWeighted(overlay, alpha, frame, 1 - alpha, 0)
+
+        return image_with_keys
 
 
     def draw_box_on_image(self, score_thresh, scores, boxes, im_width, im_height, image_np):

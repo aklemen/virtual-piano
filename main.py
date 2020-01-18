@@ -15,7 +15,8 @@ from custom_timer import CustomTimer
 Rectangle = namedtuple('Rectangle', 'xmin ymin xmax ymax')
 
 sounds = ["c1", "d1", "e1", "f1", "g1", "a1", "h1", "c2", "d2", "e2", "f2", "g2", "a2", "h2"]
-sounds = ["".join(("notes/", filename, ".wav")) for filename in sounds]
+sounds = ["".join(("../notes/", filename, ".wav")) for filename in sounds]
+print(sounds[0])
 
 
 def intersection(a, b):

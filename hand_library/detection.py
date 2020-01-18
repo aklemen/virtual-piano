@@ -92,7 +92,7 @@ if __name__ == '__main__':
                                  image_np
                                  )
 
-        drawer.draw_keyboard(image_np, im_width, im_height)
+        image_np = drawer.draw_keyboard(image_np, im_width, im_height)
 
         # Calculate Frames per second (FPS)
         num_frames += 1
