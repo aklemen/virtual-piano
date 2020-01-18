@@ -2,7 +2,7 @@ from utils import detector_utils as detector_utils
 import cv2
 import datetime
 import argparse
-import main
+import keys
 
 detection_graph, sess = detector_utils.load_inference_graph()
 
@@ -63,7 +63,7 @@ if __name__ == '__main__':
 
     # Init the number of keys and classes
     num_keys = 8
-    keys = main.Keys(im_width, im_height, num_keys)
+    keys = keys.Keys(im_width, im_height, num_keys)
     drawer = detector_utils.Drawer(keys)
 
     while True:
@@ -87,7 +87,7 @@ if __name__ == '__main__':
 
 
 
-        # draw bounding boxes on frame
+        # Draw bounding boxes on frame
         drawer.draw_box_on_image(args.score_thresh,
                                  scores,
                                  boxes,
@@ -96,6 +96,7 @@ if __name__ == '__main__':
                                  image_np
                                  )
 
+        # Draw keyboard on image
         image_np = drawer.draw_keyboard(image_np, im_width, im_height)
 
         # Calculate Frames per second (FPS)
@@ -110,9 +111,11 @@ if __name__ == '__main__':
                                              image_np)
 
 
-        flipHorizontal = cv2.flip(image_np, 1)
+        # Flip the image so it's a mirron-like
+        image_np = cv2.flip(image_np, 1)
+
         cv2.imshow('Virtual Piano',
-                   cv2.cvtColor(flipHorizontal, cv2.COLOR_RGB2BGR)
+                   cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)
                    )
 
         if cv2.waitKey(25) & 0xFF == ord('q'):

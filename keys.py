@@ -11,6 +11,13 @@ from custom_timer import CustomTimer
 # Popravi zamik speech recognitiona
 
 
+def intersection(a, b):
+    dx = min(a.xmax, b.xmax) - max(a.xmin, b.xmin)
+    dy = min(a.ymax, b.ymax) - max(a.ymin, b.ymin)
+    if (dx >= 0) and (dy >= 0):
+        return True
+    return False
+
 
 class Keys:
 
@@ -37,19 +44,13 @@ class Keys:
             temp_rect = self.Rectangle(int(unit_w*i), int(unit_h), int(unit_w*(i+1)), int(im_height))
             self.list_keys.append(temp_rect)
 
-    def intersection(self, a, b):
-        dx = min(a.xmax, b.xmax) - max(a.xmin, b.xmin)
-        dy = min(a.ymax, b.ymax) - max(a.ymin, b.ymin)
-        if (dx >= 0) and (dy >= 0):
-            return True
-        return False
-
     def check_coordinates(self, frame, x1, y1, x2, y2, position):
         temp_rect = self.Rectangle(x1, y1, x2, y2)
         for i in range(len(self.list_keys)):
-            if self.intersection(temp_rect, self.list_keys[i]):
-                print(self.sounds[i])
-                playsound(self.sounds[i], block=False)
+            key = self.list_keys[i]
+            if intersection(temp_rect, self.list_keys[i]):
+                # playsound(self.sounds[i], block=False)
+                cv2.rectangle(frame, (key[0], key[1]), (key[2], key[3]), (132, 123, 123), -1)
 
 
 
