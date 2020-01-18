@@ -51,11 +51,12 @@ def load_inference_graph():
     return detection_graph, sess
 
 class Drawer:
-    def __init__(self):
+    def __init__(self, keys):
         self.p1 = [(0, 0), (0, 0)]
         self.p2 = [(0, 0), (0, 0)]
         self.num_hands_detect = 2
-        self.num_keys = 8
+        self.keys = keys
+        self.num_keys = keys.num_keys
 
     def none_func(self):
         return
@@ -113,7 +114,7 @@ class Drawer:
                 cv2.putText(image_np, position, (self.p1[i][0],self.p1[i][0]), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36,255,12), 2)
 
                 if position != "":
-                    main.checkCoordinates(image_np, self.p1[i][0], self.p1[i][1], self.p2[i][0], self.p2[i][1], position)
+                    self.keys.check_coordinates(image_np, self.p1[i][0], self.p1[i][1], self.p2[i][0], self.p2[i][1], position)
 
 
 

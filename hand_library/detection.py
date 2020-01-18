@@ -2,6 +2,7 @@ from utils import detector_utils as detector_utils
 import cv2
 import datetime
 import argparse
+import main
 
 detection_graph, sess = detector_utils.load_inference_graph()
 
@@ -60,7 +61,10 @@ if __name__ == '__main__':
     cv2.namedWindow(window_name, cv2.WND_PROP_FULLSCREEN)
     # cv2.setWindowProperty(window_name, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 
-    drawer = detector_utils.Drawer()
+    # Init the number of keys and classes
+    num_keys = 8
+    keys = main.Keys(im_width, im_height, num_keys)
+    drawer = detector_utils.Drawer(keys)
 
     while True:
         # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
@@ -105,8 +109,10 @@ if __name__ == '__main__':
             detector_utils.draw_fps_on_image("FPS : " + str(int(fps)),
                                              image_np)
 
+
+        flipHorizontal = cv2.flip(image_np, 1)
         cv2.imshow('Virtual Piano',
-                   cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)
+                   cv2.cvtColor(flipHorizontal, cv2.COLOR_RGB2BGR)
                    )
 
         if cv2.waitKey(25) & 0xFF == ord('q'):

@@ -6,26 +6,54 @@ import threading
 from custom_timer import CustomTimer
 
 # TODO
-# Klaviatura naj bo v spodnjem delu slike
 # Na začetku roke postaviš na vrh slike za inicializacijo, potem se pokaže tipkovnica
 # Popravi igranje, da se ne ponavlja nota konstantno na vsak frame
 # Popravi zamik speech recognitiona
 
 
-Rectangle = namedtuple('Rectangle', 'xmin ymin xmax ymax')
 
-sounds = ["c1", "d1", "e1", "f1", "g1", "a1", "h1", "c2", "d2", "e2", "f2", "g2", "a2", "h2"]
-sounds = ["".join(("../notes/", filename, ".wav")) for filename in sounds]
-print(sounds[0])
+class Keys:
+
+    def __init__(self, im_width, im_height, num_keys):
+        # Named tuple for easier work with rectangle coordinates
+        self.Rectangle = namedtuple('Rectangle', 'xmin ymin xmax ymax')
+
+        # Storing width and height of image just in case
+        self.im_width = im_width
+        self.im_height = im_height
+
+        # List of sound files
+        self.sounds = ["c1", "d1", "e1", "f1", "g1", "a1", "h1", "c2", "d2", "e2", "f2", "g2", "a2", "h2"]
+        self.sounds = self.sounds[::-1]
+        self.sounds = ["".join(("../notes/", filename, ".wav")) for filename in self.sounds]
+
+        # Initializing the list of keys with their coordinates
+        self.num_keys = num_keys
+        self.list_keys = []
+        unit_w = im_width/num_keys
+        unit_h = im_height/2
+
+        for i in range(num_keys):
+            temp_rect = self.Rectangle(int(unit_w*i), int(unit_h), int(unit_w*(i+1)), int(im_height))
+            self.list_keys.append(temp_rect)
+
+    def intersection(self, a, b):
+        dx = min(a.xmax, b.xmax) - max(a.xmin, b.xmin)
+        dy = min(a.ymax, b.ymax) - max(a.ymin, b.ymin)
+        if (dx >= 0) and (dy >= 0):
+            return True
+        return False
+
+    def check_coordinates(self, frame, x1, y1, x2, y2, position):
+        temp_rect = self.Rectangle(x1, y1, x2, y2)
+        for i in range(len(self.list_keys)):
+            if self.intersection(temp_rect, self.list_keys[i]):
+                print(self.sounds[i])
+                playsound(self.sounds[i], block=False)
 
 
-def intersection(a, b):
-    dx = min(a.xmax, b.xmax) - max(a.xmin, b.xmin)
-    dy = min(a.ymax, b.ymax) - max(a.ymin, b.ymin)
-    if (dx >= 0) and (dy >= 0):
-        return True
-    return False
 
+"""
 st = 0
 bo = False
 before = False
@@ -56,5 +84,5 @@ def checkCoordinates(frame, x1, y1, x2, y2, position):
 
     elif position == "left":
         before = False
-
+"""
 
