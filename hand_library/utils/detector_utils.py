@@ -54,7 +54,12 @@ class Drawer:
     def __init__(self, keys):
         self.p1 = [(0, 0), (0, 0)]
         self.p2 = [(0, 0), (0, 0)]
+        self.p_center = [(0, 0), (0, 0)]
+
+        # Number of hands to detect. Don't change this.
         self.num_hands_detect = 2
+
+        self.box_size = 10
         self.keys = keys
         self.num_keys = keys.num_keys
 
@@ -85,47 +90,42 @@ class Drawer:
 
     def draw_box_on_image(self, score_thresh, scores, boxes, im_width, im_height, image_np):
 
+        position = "unknown"
         for i in range(self.num_hands_detect):
-            self.p1[1] = (5000, 5000)
 
-
-
-            if scores[i] > score_thresh:
+            if scores[0] > score_thresh and scores[1] > score_thresh:
 
                 (left, right, top, bottom) = (boxes[i][1] * im_width, boxes[i][3] * im_width,
                                               boxes[i][0] * im_height, boxes[i][2] * im_height)
 
-                size = 20
-                center = (int(left + (right-left)/2), int(top + (bottom-top)/2))
+                self.p_center[i] = (int(left + (right-left)/2), int(top + (bottom-top)/2))
 
                 # self.p1[i] = (int(left), int(top))
                 # self.p2[i] = (int(right), int(bottom))
 
-                self.p1[i] = (center[0]-size, center[1]-size)
-                self.p2[i] = (center[0]+size, center[1]+size)
+                # Rectangle coordinates
+                self.p1[i] = (self.p_center[i][0]-self.box_size, self.p_center[i][1]-self.box_size)
+                self.p2[i] = (self.p_center[i][0]+self.box_size, self.p_center[i][1]+self.box_size)
 
-                # Draw the bounding box
-                cv2.rectangle(image_np, self.p1[i], self.p2[i], (77, 255, 9), 3, 1)
+            # Draw the bounding box
+            cv2.rectangle(image_np, self.p1[i], self.p2[i], (77, 255, 9), 3, 1)
 
-                position = "unknown"
-                # Checking coordinates to activate sounds
-                if self.p1[0][0] < self.p1[1][0] and self.p1[1] != (5000, 5000):
-                    if i == 0:
-                        position = "left"
-                    elif i == 1:
-                        position = "right"
-                elif self.p1[0][0] > self.p1[1][0] and self.p1[1] != (5000, 5000):
-                    if i == 0:
-                        position = "right"
-                    elif i == 1:
-                        position = "left"
+            # Checking coordinates to activate sounds
+            if self.p1[0][0] < self.p1[1][0]:
+                if i == 0:
+                    position = "left"
+                elif i == 1:
+                    position = "right"
+            elif self.p1[0][0] > self.p1[1][0]:
+                if i == 0:
+                    position = "right"
+                elif i == 1:
+                    position = "left"
 
-                cv2.putText(image_np, position, center, cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36,255,12), 2)
+            cv2.putText(image_np, position, self.p_center[i], cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36,255,12), 2)
 
-                if position != "unknown":
-                    self.keys.check_coordinates(image_np, self.p1[i][0], self.p1[i][1], self.p2[i][0], self.p2[i][1], position)
-            else:
-                cv2.rectangle(image_np, self.p1[i], self.p2[i], (77, 255, 9), 3, 1)
+            if position != "unknown":
+                self.keys.check_coordinates(image_np, self.p1[i][0], self.p1[i][1], self.p2[i][0], self.p2[i][1], position)
 
 
 
