@@ -63,6 +63,11 @@ class Drawer:
         self.keys = keys
         self.num_keys = keys.num_keys
 
+        # # Testing
+        # self.previous_center_left = (100, 100)
+        # self.previous_center_right = (keys.im_width-100, 100)
+
+
     def none_func(self):
         return
 
@@ -107,9 +112,6 @@ class Drawer:
                 self.p1[i] = (self.p_center[i][0]-self.box_size, self.p_center[i][1]-self.box_size)
                 self.p2[i] = (self.p_center[i][0]+self.box_size, self.p_center[i][1]+self.box_size)
 
-            # Draw the bounding box
-            cv2.rectangle(image_np, self.p1[i], self.p2[i], (77, 255, 9), 3, 1)
-
             # Checking coordinates to activate sounds
             # Directions are swapped, because image is flipped
             if self.p1[0][0] < self.p1[1][0]:
@@ -123,7 +125,29 @@ class Drawer:
                 elif i == 1:
                     position = "right"
 
-            cv2.putText(image_np, position, self.p_center[i], cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36,255,12), 2)
+            # Draw the bounding box and text
+            cv2.rectangle(image_np, self.p1[i], self.p2[i], (77, 255, 9), 3, 1)
+            # cv2.putText(image_np, position, self.p_center[i], cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36,255,12), 2)
+
+            # distance = 150
+            #
+            # if position == "left":
+            #     if abs(self.previous_center_left[0] - self.p_center[i][0]) > distance or abs(self.previous_center_left[1] - self.p_center[i][1]) > distance:
+            #         t1 = (self.previous_center_left[0]-self.box_size, self.previous_center_left[1]-self.box_size)
+            #         t2 = (self.previous_center_left[0]+self.box_size, self.previous_center_left[1]+self.box_size)
+            #         self.keys.check_coordinates(image_np, t1[0], t1[1], t2[0], t2[1], position)
+            #     else:
+            #         self.keys.check_coordinates(image_np, self.p1[i][0], self.p1[i][1], self.p2[i][0], self.p2[i][1], position)
+            #         self.previous_center_left = self.p_center[i]
+            # elif position == "right":
+            #     if abs(self.previous_center_right[0] - self.p_center[i][0]) > distance or abs(self.previous_center_right[1] - self.p_center[i][1]) > distance:
+            #         t1 = (self.previous_center_right[0]-self.box_size, self.previous_center_right[1]-self.box_size)
+            #         t2 = (self.previous_center_right[0]+self.box_size, self.previous_center_right[1]+self.box_size)
+            #         self.keys.check_coordinates(image_np, t1[0], t1[1], t2[0], t2[1], position)
+            #     else:
+            #         self.keys.check_coordinates(image_np, self.p1[i][0], self.p1[i][1], self.p2[i][0], self.p2[i][1], position)
+            #         self.previous_center_right = self.p_center[i]
+
 
             if position != "hands_not_present":
                 self.keys.check_coordinates(image_np, self.p1[i][0], self.p1[i][1], self.p2[i][0], self.p2[i][1], position)

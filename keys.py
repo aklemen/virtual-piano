@@ -7,7 +7,6 @@ from custom_timer import CustomTimer
 
 # TODO
 # Na začetku roke postaviš na vrh slike za inicializacijo, potem se pokaže tipkovnica
-# Popravi igranje, da se ne ponavlja nota konstantno na vsak frame
 # Popravi zamik speech recognitiona
 
 
@@ -51,24 +50,35 @@ class Keys:
             self.list_keys.append(temp_rect)
 
     def check_coordinates(self, frame, x1, y1, x2, y2, position):
+
         temp_rect = self.Rectangle(x1, y1, x2, y2)
 
-        for i in range(len(self.list_keys)):
-            key = self.list_keys[i]
-            if intersection(temp_rect, self.list_keys[i]):
-                if position == "left" and self.previous_key_left != i:
-                    playsound(self.sounds[i], block=False)
-                    cv2.rectangle(frame, (key[0], key[1]), (key[2], key[3]), (132, 123, 123), -1)
-                    self.previous_key_left = i
-                elif position == "right" and self.previous_key_right != i:
-                    playsound(self.sounds[i], block=False)
-                    cv2.rectangle(frame, (key[0], key[1]), (key[2], key[3]), (132, 123, 123), -1)
-                    self.previous_key_right = i
-            elif intersection(temp_rect, self.outside_keys):
-                if position == "left":
-                    self.previous_key_left = -1
-                elif position == "right":
-                    self.previous_key_right = -1
+        if intersection(temp_rect, self.outside_keys):
+            if position == "left":
+                self.previous_key_left = -1
+                # print("LEFT OUT")
+            elif position == "right":
+                self.previous_key_right = -1
+        else:
+            for i in range(len(self.list_keys)):
+                key = self.list_keys[i]
+                if intersection(temp_rect, self.list_keys[i]):
+                    if position == "left" and self.previous_key_left != i:
+                        playsound(self.sounds[i], block=False)
+                        cv2.rectangle(frame, (key[0], key[1]), (key[2], key[3]), (132, 123, 123), -1)
+                        self.previous_key_left = i
+
+                        # print("------------------------")
+                        # print("LEFT PRESSED")
+                        # print("Coordinates: ", temp_rect)
+                        # print("------------------------")
+
+                    elif position == "right" and self.previous_key_right != i:
+                        playsound(self.sounds[i], block=False)
+                        cv2.rectangle(frame, (key[0], key[1]), (key[2], key[3]), (132, 123, 123), -1)
+                        self.previous_key_right = i
+                    break
+
 
 
 

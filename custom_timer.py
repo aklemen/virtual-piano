@@ -3,14 +3,17 @@ import time
 
 
 class CustomTimer(object):
-    def __init__(self, time, function, args=[], kwargs={}):
+    def __init__(self, time, args=[], kwargs={}):
         self.__time = time
-        self.__function = function
+        self.__function = self.empty_function
         self.__args = args
         self.__kwargs = kwargs
         self.__set()
         self.__running = False
         self.started_at = None
+
+    def empty_function(self):
+        return
 
     def __set(self):
         self.__timer = Timer(self.__time, self.__function, self.__args, self.__kwargs)
