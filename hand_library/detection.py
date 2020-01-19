@@ -22,7 +22,7 @@ if __name__ == '__main__':
         '--fps',
         dest='fps',
         type=int,
-        default=0,
+        default=1,
         help='Show FPS on detection/display visualization')
     parser.add_argument(
         '-src',
@@ -63,7 +63,8 @@ if __name__ == '__main__':
 
     # Init the number of keys and classes
     num_keys = 8
-    keys = keys.Keys(im_width, im_height, num_keys)
+    box_size = 10
+    keys = keys.Keys(im_width, im_height, num_keys, box_size)
     drawer = detector_utils.Drawer(keys)
 
     while True:

@@ -59,7 +59,7 @@ class Drawer:
         # Number of hands to detect. Don't change this.
         self.num_hands_detect = 2
 
-        self.box_size = 10
+        self.box_size = keys.box_size
         self.keys = keys
         self.num_keys = keys.num_keys
 
@@ -90,7 +90,7 @@ class Drawer:
 
     def draw_box_on_image(self, score_thresh, scores, boxes, im_width, im_height, image_np):
 
-        position = "unknown"
+        position = "hands_not_present"  # This doesn't or shouldn't happen
         for i in range(self.num_hands_detect):
 
             if scores[0] > score_thresh and scores[1] > score_thresh:
@@ -111,20 +111,21 @@ class Drawer:
             cv2.rectangle(image_np, self.p1[i], self.p2[i], (77, 255, 9), 3, 1)
 
             # Checking coordinates to activate sounds
+            # Directions are swapped, because image is flipped
             if self.p1[0][0] < self.p1[1][0]:
                 if i == 0:
-                    position = "left"
-                elif i == 1:
                     position = "right"
+                elif i == 1:
+                    position = "left"
             elif self.p1[0][0] > self.p1[1][0]:
                 if i == 0:
-                    position = "right"
-                elif i == 1:
                     position = "left"
+                elif i == 1:
+                    position = "right"
 
             cv2.putText(image_np, position, self.p_center[i], cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36,255,12), 2)
 
-            if position != "unknown":
+            if position != "hands_not_present":
                 self.keys.check_coordinates(image_np, self.p1[i][0], self.p1[i][1], self.p2[i][0], self.p2[i][1], position)
 
 

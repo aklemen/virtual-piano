@@ -21,7 +21,7 @@ def intersection(a, b):
 
 class Keys:
 
-    def __init__(self, im_width, im_height, num_keys):
+    def __init__(self, im_width, im_height, num_keys, box_size):
         # Named tuple for easier work with rectangle coordinates
         self.Rectangle = namedtuple('Rectangle', 'xmin ymin xmax ymax')
 
@@ -40,17 +40,36 @@ class Keys:
         unit_w = im_width/num_keys
         unit_h = im_height/2
 
+        # For checking intersection
+        self.previous_key_left = -1
+        self.previous_key_right = -1
+        self.box_size = box_size
+        self.outside_keys = self.Rectangle(0, 0, im_width, unit_h-(box_size*2))
+
         for i in range(num_keys):
             temp_rect = self.Rectangle(int(unit_w*i), int(unit_h), int(unit_w*(i+1)), int(im_height))
             self.list_keys.append(temp_rect)
 
     def check_coordinates(self, frame, x1, y1, x2, y2, position):
         temp_rect = self.Rectangle(x1, y1, x2, y2)
+
         for i in range(len(self.list_keys)):
             key = self.list_keys[i]
             if intersection(temp_rect, self.list_keys[i]):
-                # playsound(self.sounds[i], block=False)
-                cv2.rectangle(frame, (key[0], key[1]), (key[2], key[3]), (132, 123, 123), -1)
+                if position == "left" and self.previous_key_left != i:
+                    playsound(self.sounds[i], block=False)
+                    cv2.rectangle(frame, (key[0], key[1]), (key[2], key[3]), (132, 123, 123), -1)
+                    self.previous_key_left = i
+                elif position == "right" and self.previous_key_right != i:
+                    playsound(self.sounds[i], block=False)
+                    cv2.rectangle(frame, (key[0], key[1]), (key[2], key[3]), (132, 123, 123), -1)
+                    self.previous_key_right = i
+            elif intersection(temp_rect, self.outside_keys):
+                if position == "left":
+                    self.previous_key_left = -1
+                elif position == "right":
+                    self.previous_key_right = -1
+
 
 
 
