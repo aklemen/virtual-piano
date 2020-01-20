@@ -28,10 +28,16 @@ class Keys:
         self.im_width = im_width
         self.im_height = im_height
 
-        # List of sound files
-        self.sounds = ["c1", "d1", "e1", "f1", "g1", "a1", "h1", "c2", "d2", "e2", "f2", "g2", "a2", "h2"]
-        self.sounds = self.sounds[::-1]
-        self.sounds = ["".join(("../notes/", filename, ".wav")) for filename in self.sounds]
+        # Lists of sound files
+        self.sounds = []
+        self.notes = ["c1", "d1", "e1", "f1", "g1", "a1", "h1", "c2", "d2", "e2", "f2", "g2", "a2", "h2"]
+        self.notes = self.notes[::-1]
+
+        self.sounds.append(["".join(("../sounds/", filename, ".wav")) for filename in self.notes])
+        self.sounds.append(["".join(("../sounds/organ_", filename, ".wav")) for filename in self.notes])
+        self.sounds.append(["".join(("../sounds/flute_", filename, ".wav")) for filename in self.notes])
+
+        self.current_sound = 0
 
         # Initializing the list of keys with their coordinates
         self.num_keys = num_keys
@@ -49,6 +55,20 @@ class Keys:
             temp_rect = self.Rectangle(int(unit_w*i), int(unit_h), int(unit_w*(i+1)), int(im_height))
             self.list_keys.append(temp_rect)
 
+    def change_sound(self, instrument):
+        if instrument == "":
+            if self.current_sound < len(self.sounds) - 1:
+                self.current_sound += 1
+            else:
+                self.current_sound = 0
+        elif instrument == "piano":
+            self.current_sound = 0
+        elif instrument == "organ":
+            self.current_sound = 1
+        elif instrument == "flute":
+            self.current_sound = 2
+        playsound("../sounds/success.mp3")
+
     def check_coordinates(self, frame, x1, y1, x2, y2, position):
 
         temp_rect = self.Rectangle(x1, y1, x2, y2)
@@ -56,7 +76,6 @@ class Keys:
         if intersection(temp_rect, self.outside_keys):
             if position == "left":
                 self.previous_key_left = -1
-                # print("LEFT OUT")
             elif position == "right":
                 self.previous_key_right = -1
         else:
@@ -64,55 +83,11 @@ class Keys:
                 key = self.list_keys[i]
                 if intersection(temp_rect, self.list_keys[i]):
                     if position == "left" and self.previous_key_left != i:
-                        playsound(self.sounds[i], block=False)
+                        playsound(self.sounds[self.current_sound][i], block=False)
                         cv2.rectangle(frame, (key[0], key[1]), (key[2], key[3]), (132, 123, 123), -1)
                         self.previous_key_left = i
-
-                        # print("------------------------")
-                        # print("LEFT PRESSED")
-                        # print("Coordinates: ", temp_rect)
-                        # print("------------------------")
-
                     elif position == "right" and self.previous_key_right != i:
-                        playsound(self.sounds[i], block=False)
+                        playsound(self.sounds[self.current_sound][i], block=False)
                         cv2.rectangle(frame, (key[0], key[1]), (key[2], key[3]), (132, 123, 123), -1)
                         self.previous_key_right = i
                     break
-
-
-
-
-
-"""
-st = 0
-bo = False
-before = False
-
-
-def checkCoordinates(frame, x1, y1, x2, y2, position):
-    global st
-    global bo
-    global before
-    global timer
-
-    temp = Rectangle(x1, y1, x2, y2)
-
-    unit = 46
-
-    c4 = Rectangle(0, 0, 200, 200)
-    color = (220,20,60,0.3)
-
-    cv2.rectangle(frame, (c4[0], c4[1]), (c4[2], c4[3]), color, 3)
-
-
-    if intersection(temp, c4) and position == "left":
-        if before == False:
-            before = True
-            st += 1
-            print("Playing ", st)
-            playsound(sounds[0], block=False)
-
-    elif position == "left":
-        before = False
-"""
-

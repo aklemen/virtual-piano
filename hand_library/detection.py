@@ -2,123 +2,169 @@ from utils import detector_utils as detector_utils
 import cv2
 import datetime
 import argparse
-import keys
+from keys import Keys
+import speech_recognition as sr
 
 detection_graph, sess = detector_utils.load_inference_graph()
 
-if __name__ == '__main__':
+class Detector:
+    def __init__(self):
+        # Argument for 'customization'
+        parser = argparse.ArgumentParser()
+        parser.add_argument(
+            '-sth',
+            '--scorethreshold',
+            dest='score_thresh',
+            type=float,
+            default=0.2,
+            help='Score threshold for displaying bounding boxes')
+        parser.add_argument(
+            '-fps',
+            '--fps',
+            dest='fps',
+            type=int,
+            default=1,
+            help='Show FPS on detection/display visualization')
+        parser.add_argument(
+            '-src',
+            '--source',
+            dest='video_source',
+            default=0,
+            help='Device index of the camera.')
+        parser.add_argument(
+            '-wd',
+            '--width',
+            dest='width',
+            type=int,
+            default=320,
+            help='Width of the frames in the video stream.')
+        parser.add_argument(
+            '-ht',
+            '--height',
+            dest='height',
+            type=int,
+            default=180,
+            help='Height of the frames in the video stream.')
+        self.args = parser.parse_args()
 
-    # Argument for 'customization'
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '-sth',
-        '--scorethreshold',
-        dest='score_thresh',
-        type=float,
-        default=0.2,
-        help='Score threshold for displaying bounding boxes')
-    parser.add_argument(
-        '-fps',
-        '--fps',
-        dest='fps',
-        type=int,
-        default=1,
-        help='Show FPS on detection/display visualization')
-    parser.add_argument(
-        '-src',
-        '--source',
-        dest='video_source',
-        default=0,
-        help='Device index of the camera.')
-    parser.add_argument(
-        '-wd',
-        '--width',
-        dest='width',
-        type=int,
-        default=320,
-        help='Width of the frames in the video stream.')
-    parser.add_argument(
-        '-ht',
-        '--height',
-        dest='height',
-        type=int,
-        default=180,
-        help='Height of the frames in the video stream.')
-    args = parser.parse_args()
+        # Window and variables setup
+        self.cap = cv2.VideoCapture(self.args.video_source)
+        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.args.width)
+        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.args.height)
 
-    # Window and variables setup
-    cap = cv2.VideoCapture(args.video_source)
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, args.width)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, args.height)
+        self.start_time = datetime.datetime.now()
+        self.num_frames = 0
+        self.im_width, self.im_height = (self.cap.get(3), self.cap.get(4))
 
-    start_time = datetime.datetime.now()
-    num_frames = 0
-    im_width, im_height = (cap.get(3), cap.get(4))
+        window_name = 'Virtual Piano'
 
-    window_name = 'Virtual Piano'
+        #TODO change to fullscreen
+        cv2.namedWindow(window_name, cv2.WND_PROP_FULLSCREEN)
+        # cv2.setWindowProperty(window_name, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 
-    #TODO change to fullscreen
-    cv2.namedWindow(window_name, cv2.WND_PROP_FULLSCREEN)
-    # cv2.setWindowProperty(window_name, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+        # Init the number of keys and classes
+        num_keys = 7
+        box_size = 10
+        self.keys = Keys(self.im_width, self.im_height, num_keys, box_size)
+        self.drawer = detector_utils.Drawer(self.keys)
 
-    # Init the number of keys and classes
-    num_keys = 8
-    box_size = 10
-    keys = keys.Keys(im_width, im_height, num_keys, box_size)
-    drawer = detector_utils.Drawer(keys)
+    def run(self):
 
-    while True:
-        # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
-        ret, image_np = cap.read()
+        while True:
+            # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
+            ret, image_np = self.cap.read()
+
+            try:
+                image_np = cv2.cvtColor(image_np, cv2.COLOR_BGR2RGB)
+            except:
+                print("Error converting to RGB")
+
+            # Detection.
+            # 'boxes' contains the bounding box cordinates for hands detected
+            # 'scores' contains the confidence for each of the boxes
+
+            boxes, scores = detector_utils.detect_objects(image_np,
+                                                          detection_graph,
+                                                          sess
+                                                          )
+
+            # Draw bounding boxes on frame
+            self.drawer.draw_box_on_image(self.args.score_thresh,
+                                     scores,
+                                     boxes,
+                                     self.im_width,
+                                     self.im_height,
+                                     image_np
+                                     )
+
+            # Draw keyboard on image
+            image_np = self.drawer.draw_keyboard(image_np, self.im_width, self.im_height)
+
+            # Calculate Frames per second (FPS)
+            self.num_frames += 1
+            elapsed_time = (datetime.datetime.now() - self.start_time).total_seconds()
+            fps = self.num_frames / elapsed_time
 
 
+            # Display FPS on frame
+            if self.args.fps > 0:
+                detector_utils.draw_fps_on_image("FPS : " + str(int(fps)),
+                                                 image_np)
+
+
+            # Flip the image so it's a mirron-like
+            image_np = cv2.flip(image_np, 1)
+
+            cv2.imshow('Virtual Piano',
+                       cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)
+                       )
+
+            if cv2.waitKey(25) & 0xFF == ord('q'):
+                cv2.destroyAllWindows()
+                break
+
+    def speech_recognition(self):
+        print("Listening...")
+        r = sr.Recognizer()
+        m = sr.Microphone()
+        with m as source:
+            r.adjust_for_ambient_noise(source)
+
+        r.listen_in_background(m, self.callback)
+
+    def callback(self, recognizer, audio):
         try:
-            image_np = cv2.cvtColor(image_np, cv2.COLOR_BGR2RGB)
-        except:
-            print("Error converting to RGB")
+            speech = recognizer.recognize_google(audio, language="sl-SI")
+            print("You said: " + speech)
 
-        # Detection.
-        # 'boxes' contains the bounding box cordinates for hands detected
-        # 'scores' contains the confidence for each of the boxes
+            # Change instruments
+            if (("menjaj" in speech) or ("spremen" in speech)) and ("zvok" in speech):
+                self.keys.change_sound("")
+            elif "klavir" in speech:
+                self.keys.change_sound("piano")
+            elif "orgl" in speech:
+                self.keys.change_sound("organ")
+            elif ("piščal" in speech) or ("flavt" in speech):
+                self.keys.change_sound("flute")
 
-        boxes, scores = detector_utils.detect_objects(image_np,
-                                                      detection_graph,
-                                                      sess
-                                                      )
-
-
-
-        # Draw bounding boxes on frame
-        drawer.draw_box_on_image(args.score_thresh,
-                                 scores,
-                                 boxes,
-                                 im_width,
-                                 im_height,
-                                 image_np
-                                 )
-
-        # Draw keyboard on image
-        image_np = drawer.draw_keyboard(image_np, im_width, im_height)
-
-        # Calculate Frames per second (FPS)
-        num_frames += 1
-        elapsed_time = (datetime.datetime.now() - start_time).total_seconds()
-        fps = num_frames / elapsed_time
+            # Change colors
+            if "črn" in speech:
+                self.drawer.change_color("black")
+            elif "modr" in speech:
+                self.drawer.change_color("blue")
+            elif "rdeč" in speech:
+                self.drawer.change_color("red")
+            elif "zelen" in speech:
+                self.drawer.change_color("green")
 
 
-        # Display FPS on frame
-        if (args.fps > 0):
-            detector_utils.draw_fps_on_image("FPS : " + str(int(fps)),
-                                             image_np)
+        except sr.UnknownValueError:
+            print("I didn't understand.")
+        except sr.RequestError as e:
+            print("Google Speech Recognition not available {0}".format(e))
 
 
-        # Flip the image so it's a mirron-like
-        image_np = cv2.flip(image_np, 1)
-
-        cv2.imshow('Virtual Piano',
-                   cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)
-                   )
-
-        if cv2.waitKey(25) & 0xFF == ord('q'):
-            cv2.destroyAllWindows()
-            break
+if __name__ == '__main__':
+    detector = Detector()
+    detector.speech_recognition()
+    detector.run()

@@ -4,14 +4,10 @@ import numpy as np
 import sys
 import tensorflow as tf
 import os
-from threading import Thread, Timer
-from datetime import datetime
+from threading import Thread
 import cv2
 from utils import label_map_util
-from collections import defaultdict
-
-import keys
-from custom_timer import CustomTimer
+from playsound import playsound
 
 
 detection_graph = tf.Graph()
@@ -69,17 +65,27 @@ class Drawer:
         self.keys = keys
         self.num_keys = keys.num_keys
 
-        # # Testing
-        self.frames = 5
-        self.middle_index = find_middle(self.frames)
-        self.counter_left = 0
-        self.counter_right = 0
-        self.positions_left = []
-        self.positions_right = []
+        self.current_color = (0, 0, 0, 0.3)
 
+        # Testing
+        # self.frames = 5
+        # self.middle_index = find_middle(self.frames)
+        # self.counter_left = 0
+        # self.counter_right = 0
+        # self.positions_left = []
+        # self.positions_right = []
 
-    def none_func(self):
-        return
+    def change_color(self, color):
+        if color == "black":
+            self.current_color = (0, 0, 0, 0.3)
+        elif color == "blue":
+            self.current_color = (2, 105, 164, 0.3)
+        elif color == "red":
+            self.current_color = (139, 0, 0, 0.3)
+        elif color == "green":
+            self.current_color = (0, 128, 0, 0.3)
+        playsound("../sounds/success.mp3")
+
 
     def draw_keyboard(self, frame, im_width, im_height):
         unit_w = im_width/self.num_keys
@@ -91,7 +97,7 @@ class Drawer:
 
         for i in range(self.num_keys):
             if i % 2 == 0:
-                color = (0, 0, 0, 0.3)
+                color = self.current_color
             else:
                 color = (255, 255, 255, 0.3)
             t1 = (int(unit_w*i), int(unit_h))
@@ -102,60 +108,6 @@ class Drawer:
 
         return image_with_keys
 
-
-    def draw_box_on_image(self, score_thresh, scores, boxes, im_width, im_height, image_np):
-
-        position = "hands_not_present"  # This doesn't or shouldn't happen
-        for i in range(self.num_hands_detect):
-
-            if scores[0] > score_thresh and scores[1] > score_thresh:
-
-                (left, right, top, bottom) = (boxes[i][1] * im_width, boxes[i][3] * im_width,
-                                              boxes[i][0] * im_height, boxes[i][2] * im_height)
-
-                self.p_center[i] = (int(left + (right-left)/2), int(top + (bottom-top)/2))
-
-                # self.p1[i] = (int(left), int(top))
-                # self.p2[i] = (int(right), int(bottom))
-
-                # Rectangle coordinates
-                self.p1[i] = (self.p_center[i][0]-self.box_size, self.p_center[i][1]-self.box_size)
-                self.p2[i] = (self.p_center[i][0]+self.box_size, self.p_center[i][1]+self.box_size)
-
-            # Checking coordinates to activate sounds
-            # Directions are swapped, because image is flipped
-            if self.p1[0][0] < self.p1[1][0]:
-                if i == 0:
-                    position = "right"
-                elif i == 1:
-                    position = "left"
-            elif self.p1[0][0] > self.p1[1][0]:
-                if i == 0:
-                    position = "left"
-                elif i == 1:
-                    position = "right"
-
-            # Draw the bounding box and text
-            cv2.rectangle(image_np, self.p1[i], self.p2[i], (77, 255, 9), 3, 1)
-            # cv2.putText(image_np, position, self.p_center[i], cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36,255,12), 2)
-
-            if position == "left":
-                self.positions_left.append([self.p1[i][0], self.p1[i][1], self.p2[i][0], self.p2[i][1]])
-                self.counter_left += 1
-                if self.counter_left == self.frames:
-                    coordinates = self.positions_left[self.middle_index]
-                    self.keys.check_coordinates(image_np, coordinates[0], coordinates[1], coordinates[2], coordinates[3], position)
-                    self.counter_left = 0
-                    self.positions_left.clear()
-            elif position == "right":
-                self.positions_right.append([self.p1[i][0], self.p1[i][1], self.p2[i][0], self.p2[i][1]])
-                self.counter_right += 1
-                if self.counter_right == self.frames:
-                    coordinates = self.positions_right[self.middle_index]
-                    print(coordinates)
-                    self.keys.check_coordinates(image_np, coordinates[0], coordinates[1], coordinates[2], coordinates[3], position)
-                    self.counter_right = 0
-                    self.positions_right.clear()
 
     # def draw_box_on_image(self, score_thresh, scores, boxes, im_width, im_height, image_np):
     #
@@ -193,8 +145,62 @@ class Drawer:
     #         cv2.rectangle(image_np, self.p1[i], self.p2[i], (77, 255, 9), 3, 1)
     #         # cv2.putText(image_np, position, self.p_center[i], cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36,255,12), 2)
     #
-    #         if position != "hands_not_present":
-    #             self.keys.check_coordinates(image_np, self.p1[i][0], self.p1[i][1], self.p2[i][0], self.p2[i][1], position)
+    #         if position == "left":
+    #             self.positions_left.append([self.p1[i][0], self.p1[i][1], self.p2[i][0], self.p2[i][1]])
+    #             self.counter_left += 1
+    #             if self.counter_left == self.frames:
+    #                 coordinates = self.positions_left[self.middle_index]
+    #                 self.keys.check_coordinates(image_np, coordinates[0], coordinates[1], coordinates[2], coordinates[3], position)
+    #                 self.counter_left = 0
+    #                 self.positions_left.clear()
+    #         elif position == "right":
+    #             self.positions_right.append([self.p1[i][0], self.p1[i][1], self.p2[i][0], self.p2[i][1]])
+    #             self.counter_right += 1
+    #             if self.counter_right == self.frames:
+    #                 coordinates = self.positions_right[self.middle_index]
+    #                 print(coordinates)
+    #                 self.keys.check_coordinates(image_np, coordinates[0], coordinates[1], coordinates[2], coordinates[3], position)
+    #                 self.counter_right = 0
+    #                 self.positions_right.clear()
+
+    def draw_box_on_image(self, score_thresh, scores, boxes, im_width, im_height, image_np):
+
+        position = "hands_not_present"  # This doesn't or shouldn't happen
+        for i in range(self.num_hands_detect):
+
+            if scores[0] > score_thresh and scores[1] > score_thresh:
+
+                (left, right, top, bottom) = (boxes[i][1] * im_width, boxes[i][3] * im_width,
+                                              boxes[i][0] * im_height, boxes[i][2] * im_height)
+
+                self.p_center[i] = (int(left + (right-left)/2), int(top + (bottom-top)/2))
+
+                # self.p1[i] = (int(left), int(top))
+                # self.p2[i] = (int(right), int(bottom))
+
+                # Rectangle coordinates
+                self.p1[i] = (self.p_center[i][0]-self.box_size, self.p_center[i][1]-self.box_size)
+                self.p2[i] = (self.p_center[i][0]+self.box_size, self.p_center[i][1]+self.box_size)
+
+            # Checking coordinates to activate sounds
+            # Directions are swapped, because image is flipped
+            if self.p1[0][0] < self.p1[1][0]:
+                if i == 0:
+                    position = "right"
+                elif i == 1:
+                    position = "left"
+            elif self.p1[0][0] > self.p1[1][0]:
+                if i == 0:
+                    position = "left"
+                elif i == 1:
+                    position = "right"
+
+            # Draw the bounding box and text
+            cv2.rectangle(image_np, self.p1[i], self.p2[i], (77, 255, 9), 3, 1)
+            # cv2.putText(image_np, position, self.p_center[i], cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36,255,12), 2)
+
+            if position != "hands_not_present":
+                self.keys.check_coordinates(image_np, self.p1[i][0], self.p1[i][1], self.p2[i][0], self.p2[i][1], position)
 
 
 

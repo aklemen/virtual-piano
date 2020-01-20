@@ -40,7 +40,7 @@ def create_category_index(categories):
     """Creates dictionary of COCO compatible categories keyed by category id.
 
     Args:
-      categories: a list of dicts, each of which has the following notes:
+      categories: a list of dicts, each of which has the following sounds:
         'id': (required) an integer id uniquely identifying this category.
         'name': (required) string representing category name
           e.g., 'cat', 'dog', 'pizza'.
@@ -61,7 +61,7 @@ def convert_label_map_to_categories(label_map,
     """Loads label map proto and returns categories list compatible with eval.
 
     This function loads a label map and returns a list of dicts, each of which
-    has the following notes:
+    has the following sounds:
       'id': (required) an integer id uniquely identifying this category.
       'name': (required) string representing category name
         e.g., 'cat', 'dog', 'pizza'.
