@@ -23,7 +23,7 @@ class Detector:
             '--fps',
             dest='fps',
             type=int,
-            default=1,
+            default=0,
             help='Show FPS on detection/display visualization')
         parser.add_argument(
             '-src',
@@ -68,7 +68,15 @@ class Detector:
         self.keys = Keys(self.im_width, self.im_height, num_keys, box_size)
         self.drawer = detector_utils.Drawer(self.keys)
 
+
     def run(self):
+        # To center text
+        font = cv2.FONT_HERSHEY_COMPLEX
+        text = "Postavite roki v polja."
+        textsize = cv2.getTextSize(text, font, 1, 2)[0]
+        textX = (self.im_width - textsize[0]) / 2
+        textY = (self.im_height + textsize[1]) / 2
+
 
         while True:
             # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
@@ -112,8 +120,10 @@ class Detector:
                                                  image_np)
 
 
-            # Flip the image so it's a mirron-like
+            # Flip the image so it's a mirror-like
             image_np = cv2.flip(image_np, 1)
+
+            cv2.putText(image_np, text, (int(textX), int(textY)), font, 1, (2, 105, 164), 2)
 
             cv2.imshow('Virtual Piano',
                        cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)
