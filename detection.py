@@ -2,8 +2,10 @@ from utils import detector_utils as detector_utils
 import cv2
 import datetime
 import argparse
-from keys import Keys
 import speech_recognition as sr
+
+from keys import Keys
+from drawing import Drawer
 
 detection_graph, sess = detector_utils.load_inference_graph()
 
@@ -65,14 +67,17 @@ class Detector:
         # Init the number of keys and classes
         num_keys = 7
         box_size = 10
-        self.keys = Keys(self.im_width, self.im_height, num_keys, box_size)
-        self.drawer = detector_utils.Drawer(self.keys)
+        self.unit_w = self.im_width/num_keys
+        self.unit_h = self.im_height/3
+        self.keys = Keys(self.im_width, self.im_height, num_keys, box_size, self.unit_w, self.unit_h)
+        self.drawer = Drawer(self.keys, self.unit_w, self.unit_h)
 
 
     def run(self):
         # To center text
         font = cv2.FONT_HERSHEY_COMPLEX
-        text = "Postavite roki v polja."
+        # text = "Postavite roki v polja."
+        text = ""
         textsize = cv2.getTextSize(text, font, 1, 2)[0]
         textX = (self.im_width - textsize[0]) / 2
         textY = (self.im_height + textsize[1]) / 2
@@ -133,6 +138,7 @@ class Detector:
                 cv2.destroyAllWindows()
                 break
 
+    # Speech recognition
     def speech_recognition(self):
         print("Listening...")
         recognizer = sr.Recognizer()
@@ -170,9 +176,3 @@ class Detector:
             print("I didn't understand.")
         except sr.RequestError as e:
             print("Google Speech Recognition not available {0}".format(e))
-
-
-if __name__ == '__main__':
-    detector = Detector()
-    detector.speech_recognition()
-    detector.run()

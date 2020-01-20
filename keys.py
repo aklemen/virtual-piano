@@ -7,7 +7,6 @@ from custom_timer import CustomTimer
 
 # TODO
 # Na začetku roke postaviš na vrh slike za inicializacijo, potem se pokaže tipkovnica
-# Popravi zamik speech recognitiona
 
 
 def intersection(a, b):
@@ -20,7 +19,7 @@ def intersection(a, b):
 
 class Keys:
 
-    def __init__(self, im_width, im_height, num_keys, box_size):
+    def __init__(self, im_width, im_height, num_keys, box_size, unit_w, unit_h):
         # Named tuple for easier work with rectangle coordinates
         self.Rectangle = namedtuple('Rectangle', 'xmin ymin xmax ymax')
 
@@ -33,26 +32,24 @@ class Keys:
         self.notes = ["c1", "d1", "e1", "f1", "g1", "a1", "h1", "c2", "d2", "e2", "f2", "g2", "a2", "h2"]
         self.notes = self.notes[::-1]
 
-        self.sounds.append(["".join(("../sounds/", filename, ".wav")) for filename in self.notes])
-        self.sounds.append(["".join(("../sounds/organ_", filename, ".wav")) for filename in self.notes])
-        self.sounds.append(["".join(("../sounds/flute_", filename, ".wav")) for filename in self.notes])
+        self.sounds.append(["".join(("sounds/", filename, ".wav")) for filename in self.notes])
+        self.sounds.append(["".join(("sounds/organ_", filename, ".wav")) for filename in self.notes])
+        self.sounds.append(["".join(("sounds/flute_", filename, ".wav")) for filename in self.notes])
 
         self.current_sound = 0
 
         # Initializing the list of keys with their coordinates
         self.num_keys = num_keys
         self.list_keys = []
-        unit_w = im_width/num_keys
-        unit_h = im_height/2
 
         # For checking intersection
         self.previous_key_left = -1
         self.previous_key_right = -1
         self.box_size = box_size
-        self.outside_keys = self.Rectangle(0, 0, im_width, unit_h-(box_size*2))
+        self.outside_keys = self.Rectangle(0, 0, im_width, int(im_height - unit_h) - (box_size*2))
 
         for i in range(num_keys):
-            temp_rect = self.Rectangle(int(unit_w*i), int(unit_h), int(unit_w*(i+1)), int(im_height))
+            temp_rect = self.Rectangle(int(unit_w*i), int(im_height - unit_h), int(unit_w*(i+1)), int(im_height))
             self.list_keys.append(temp_rect)
 
     def change_sound(self, instrument):
@@ -61,16 +58,16 @@ class Keys:
                 self.current_sound += 1
             else:
                 self.current_sound = 0
-            playsound("../sounds/success.mp3")
+            playsound("sounds/success.mp3")
         elif instrument == "piano":
             self.current_sound = 0
-            playsound("../sounds/success.mp3")
+            playsound("sounds/success.mp3")
         elif instrument == "organ":
             self.current_sound = 1
-            playsound("../sounds/success.mp3")
+            playsound("sounds/success.mp3")
         elif instrument == "flute":
             self.current_sound = 2
-            playsound("../sounds/success.mp3")
+            playsound("sounds/success.mp3")
 
     def check_coordinates(self, frame, x1, y1, x2, y2, position):
 
