@@ -60,9 +60,9 @@ class Detector:
 
         window_name = 'Virtual Piano'
 
-        #TODO change to fullscreen
         cv2.namedWindow(window_name, cv2.WND_PROP_FULLSCREEN)
-        # cv2.setWindowProperty(window_name, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+        # Set to full screen
+        cv2.setWindowProperty(window_name, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 
         # Init the number of keys and classes
         num_keys = 7
@@ -70,17 +70,17 @@ class Detector:
         self.unit_w = self.im_width/num_keys
         self.unit_h = self.im_height/3
         self.keys = Keys(self.im_width, self.im_height, num_keys, box_size, self.unit_w, self.unit_h)
-        self.drawer = Drawer(self.keys, self.unit_w, self.unit_h)
+        self.drawer = Drawer(self.keys, self.unit_w, self.unit_h, self.im_width, self.im_height)
 
+        self.initialized = False
 
     def run(self):
         # To center text
         font = cv2.FONT_HERSHEY_COMPLEX
-        # text = "Postavite roki v polja."
-        text = ""
+        text = "Postavite roki v polja."
         textsize = cv2.getTextSize(text, font, 1, 2)[0]
         textX = (self.im_width - textsize[0]) / 2
-        textY = (self.im_height + textsize[1]) / 2
+        textY = (self.unit_h/2) + textsize[1]
 
 
         while True:
@@ -101,17 +101,25 @@ class Detector:
                                                           sess
                                                           )
 
-            # Draw bounding boxes on frame
-            self.drawer.draw_box_on_image(self.args.score_thresh,
-                                     scores,
-                                     boxes,
-                                     self.im_width,
-                                     self.im_height,
-                                     image_np
-                                     )
 
-            # Draw keyboard on image
-            image_np = self.drawer.draw_keyboard(image_np, self.im_width, self.im_height)
+            # Draw bounding boxes on frame
+            # self.initialized = self.drawer.draw_box_on_image(self.args.score_thresh,
+            #                          scores,
+            #                          boxes,
+            #                          self.im_width,
+            #                          self.im_height,
+            #                          image_np,
+            #                          self.initialized
+            #                          )
+
+            self.initialized = self.drawer.draw_box_on_image(self.args.score_thresh,
+                         scores,
+                         boxes,
+                         self.im_width,
+                         self.im_height,
+                         image_np,
+                         self.initialized
+                         )
 
             # Calculate Frames per second (FPS)
             self.num_frames += 1
@@ -128,7 +136,13 @@ class Detector:
             # Flip the image so it's a mirror-like
             image_np = cv2.flip(image_np, 1)
 
-            cv2.putText(image_np, text, (int(textX), int(textY)), font, 1, (2, 105, 164), 2)
+
+            # Draw keyboard on image
+            if self.initialized:
+                image_np = self.drawer.draw_keyboard(image_np, self.im_height)
+            else:
+                cv2.putText(image_np, text, (int(textX), int(textY)), font, 1, (2, 105, 164), 2)
+
 
             cv2.imshow('Virtual Piano',
                        cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)

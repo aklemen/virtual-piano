@@ -48,6 +48,11 @@ class Keys:
         self.box_size = box_size
         self.outside_keys = self.Rectangle(0, 0, im_width, int(im_height - unit_h) - (box_size*2))
 
+        self.rect_height = unit_w
+        self.start_bottom_y = im_height+self.rect_height
+        self.list_counters = [int(self.start_bottom_y)] * num_keys
+        self.speed = 50
+
         for i in range(num_keys):
             temp_rect = self.Rectangle(int(unit_w*i), int(im_height - unit_h), int(unit_w*(i+1)), int(im_height))
             self.list_keys.append(temp_rect)
@@ -58,20 +63,25 @@ class Keys:
                 self.current_sound += 1
             else:
                 self.current_sound = 0
-            playsound("sounds/success.mp3")
+            playsound("sounds/success.mp3", block=False)
         elif instrument == "piano":
             self.current_sound = 0
-            playsound("sounds/success.mp3")
+            playsound("sounds/success.mp3", block=False)
         elif instrument == "organ":
             self.current_sound = 1
-            playsound("sounds/success.mp3")
+            playsound("sounds/success.mp3", block=False)
         elif instrument == "flute":
             self.current_sound = 2
-            playsound("sounds/success.mp3")
+            playsound("sounds/success.mp3", block=False)
 
-    def check_coordinates(self, frame, x1, y1, x2, y2, position):
+    def check_coordinates(self, frame, x1, y1, x2, y2, position, color):
 
         temp_rect = self.Rectangle(x1, y1, x2, y2)
+
+        for i in range(len(self.list_keys)):
+            key = self.list_keys[i]
+            self.list_counters[i] -= self.speed
+            cv2.rectangle(frame, (key[0], int(self.list_counters[i]-self.rect_height)), (key[2], int(self.list_counters[i])), color, -1)
 
         if intersection(temp_rect, self.outside_keys):
             if position == "left":
@@ -86,8 +96,10 @@ class Keys:
                         playsound(self.sounds[self.current_sound][i], block=False)
                         cv2.rectangle(frame, (key[0], key[1]), (key[2], key[3]), (132, 123, 123), -1)
                         self.previous_key_left = i
+                        self.list_counters[i] = self.start_bottom_y
                     elif position == "right" and self.previous_key_right != i:
                         playsound(self.sounds[self.current_sound][i], block=False)
                         cv2.rectangle(frame, (key[0], key[1]), (key[2], key[3]), (132, 123, 123), -1)
                         self.previous_key_right = i
+                        self.list_counters[i] = self.start_bottom_y
                     break
