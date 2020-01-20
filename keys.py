@@ -56,18 +56,21 @@ class Keys:
             self.list_keys.append(temp_rect)
 
     def change_sound(self, instrument):
-        if instrument == "":
+        if instrument == "change":
             if self.current_sound < len(self.sounds) - 1:
                 self.current_sound += 1
             else:
                 self.current_sound = 0
+            playsound("../sounds/success.mp3")
         elif instrument == "piano":
             self.current_sound = 0
+            playsound("../sounds/success.mp3")
         elif instrument == "organ":
             self.current_sound = 1
+            playsound("../sounds/success.mp3")
         elif instrument == "flute":
             self.current_sound = 2
-        playsound("../sounds/success.mp3")
+            playsound("../sounds/success.mp3")
 
     def check_coordinates(self, frame, x1, y1, x2, y2, position):
 

@@ -65,7 +65,8 @@ class Drawer:
         self.keys = keys
         self.num_keys = keys.num_keys
 
-        self.current_color = (0, 0, 0, 0.3)
+        self.colors = [(0, 0, 0, 0.3), (2, 105, 164, 0.3), (139, 0, 0, 0.3), (0, 128, 0, 0.3)]
+        self.current_color = 0
 
         # Testing
         # self.frames = 5
@@ -76,15 +77,24 @@ class Drawer:
         # self.positions_right = []
 
     def change_color(self, color):
-        if color == "black":
-            self.current_color = (0, 0, 0, 0.3)
+        if color == "change":
+            if self.current_color < len(self.colors) - 1:
+                self.current_color += 1
+            else:
+                self.current_color = 0
+            playsound("../sounds/success.mp3")
+        elif color == "black":
+            self.current_color = 0
+            playsound("../sounds/success.mp3")
         elif color == "blue":
-            self.current_color = (2, 105, 164, 0.3)
+            self.current_color = 1
+            playsound("../sounds/success.mp3")
         elif color == "red":
-            self.current_color = (139, 0, 0, 0.3)
+            self.current_color = 2
+            playsound("../sounds/success.mp3")
         elif color == "green":
-            self.current_color = (0, 128, 0, 0.3)
-        playsound("../sounds/success.mp3")
+            self.current_color = 3
+            playsound("../sounds/success.mp3")
 
 
     def draw_keyboard(self, frame, im_width, im_height):
@@ -97,7 +107,7 @@ class Drawer:
 
         for i in range(self.num_keys):
             if i % 2 == 0:
-                color = self.current_color
+                color = self.colors[self.current_color]
             else:
                 color = (255, 255, 255, 0.3)
             t1 = (int(unit_w*i), int(unit_h))

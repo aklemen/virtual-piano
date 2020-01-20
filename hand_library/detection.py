@@ -135,12 +135,8 @@ class Detector:
 
     def speech_recognition(self):
         print("Listening...")
-        r = sr.Recognizer()
-        m = sr.Microphone()
-        with m as source:
-            r.adjust_for_ambient_noise(source)
-
-        r.listen_in_background(m, self.callback)
+        recognizer = sr.Recognizer()
+        recognizer.listen_in_background(sr.Microphone(), self.callback)
 
     def callback(self, recognizer, audio):
         try:
@@ -148,8 +144,8 @@ class Detector:
             print("You said: " + speech)
 
             # Change instruments
-            if (("menjaj" in speech) or ("spremen" in speech)) and ("zvok" in speech):
-                self.keys.change_sound("")
+            if (("zamenjaj" in speech) or ("spremeni" in speech)) and ("zvok" in speech):
+                self.keys.change_sound("change")
             elif "klavir" in speech:
                 self.keys.change_sound("piano")
             elif "orgl" in speech:
@@ -158,6 +154,8 @@ class Detector:
                 self.keys.change_sound("flute")
 
             # Change colors
+            if (("zamenjaj" in speech) or ("spremeni" in speech)) and ("barv" in speech):
+                self.drawer.change_color("change")
             if "črn" in speech:
                 self.drawer.change_color("black")
             elif "modr" in speech:
