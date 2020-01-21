@@ -1,4 +1,4 @@
-from utils import detector_utils as detector_utils
+from hand_library.utils import detector_utils as detector_utils
 import cv2
 import datetime
 import argparse

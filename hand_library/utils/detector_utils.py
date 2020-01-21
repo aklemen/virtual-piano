@@ -6,7 +6,7 @@ import tensorflow as tf
 import os
 from threading import Thread
 import cv2
-from utils import label_map_util
+from hand_library.utils import label_map_util
 
 detection_graph = tf.Graph()
 sys.path.append("..")
