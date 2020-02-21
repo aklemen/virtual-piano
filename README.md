@@ -1,14 +1,14 @@
 # Setup instructions
 
 Hardware requirements:
-* Grafična kartica NVIDIA s podporo CUDA
-* Spletna kamera
-* Mikrofon
+* NVIDIA GPU with CUDA support
+* Webcam
+* Microphone
 
 Software requirements:
 * Python 3.7
 * CUDA Toolkit 10.0
-* cuDNN knjižnjica za CUDA Toolkit 10.0
+* cuDNN library for CUDA Toolkit 10.0
 
 Python modules required:
 * pip install tensorflow-gpu==1.14
@@ -24,3 +24,7 @@ python main.py
 ```
 
 The results are best if we have good lighting and plain background, but it should work good even if the latter requirement is not satisfied.
+
+# In use
+
+![](https://user-images.githubusercontent.com/56405660/75018019-80ba3e80-548e-11ea-807a-8febea18df7d.jpg)  |  ![](https://user-images.githubusercontent.com/56405660/75018046-8e6fc400-548e-11ea-8452-ddad3e3d778b.jpg)
