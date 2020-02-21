@@ -11,7 +11,7 @@ detection_graph, sess = detector_utils.load_inference_graph()
 
 class Detector:
     def __init__(self):
-        # Argument for 'customization'
+        # Arguments for 'customization'
         parser = argparse.ArgumentParser()
         parser.add_argument(
             '-sth',
@@ -27,6 +27,7 @@ class Detector:
             type=int,
             default=0,
             help='Show FPS on detection/display visualization')
+        # Set webcam source
         parser.add_argument(
             '-src',
             '--source',
@@ -77,7 +78,7 @@ class Detector:
     def run(self):
         # To center text
         font = cv2.FONT_HERSHEY_COMPLEX
-        text = "Postavite roki v polja."
+        text = "Put your hands in squares."
         textsize = cv2.getTextSize(text, font, 1, 2)[0]
         textX = (self.im_width - textsize[0]) / 2
         textY = (self.unit_h/2) + textsize[1]
@@ -164,25 +165,25 @@ class Detector:
             print("You said: " + speech)
 
             # Change instruments
-            if (("zamenjaj" in speech) or ("spremeni" in speech)) and ("zvok" in speech):
+            if (("switch" in speech) or ("change" in speech)) and ("sound" in speech):
                 self.keys.change_sound("change")
-            elif "klavir" in speech:
+            elif "piano" in speech:
                 self.keys.change_sound("piano")
-            elif "orgl" in speech:
+            elif "organ" in speech:
                 self.keys.change_sound("organ")
-            elif ("piščal" in speech) or ("flavt" in speech):
+            elif "flut" in speech:
                 self.keys.change_sound("flute")
 
             # Change colors
-            if (("zamenjaj" in speech) or ("spremeni" in speech)) and ("barv" in speech):
+            if (("switch" in speech) or ("change" in speech)) and (("color" in speech) or ("colour" in speech)):
                 self.drawer.change_color("change")
-            if "črn" in speech:
+            if "black" in speech:
                 self.drawer.change_color("black")
-            elif "modr" in speech:
+            elif "blue" in speech:
                 self.drawer.change_color("blue")
-            elif "rdeč" in speech:
+            elif "red" in speech:
                 self.drawer.change_color("red")
-            elif "zelen" in speech:
+            elif "green" in speech:
                 self.drawer.change_color("green")
 
 

@@ -1,12 +1,6 @@
 from collections import namedtuple
 import cv2
 from playsound import playsound
-import time
-import threading
-from custom_timer import CustomTimer
-
-# TODO
-# Na začetku roke postaviš na vrh slike za inicializacijo, potem se pokaže tipkovnica
 
 
 def intersection(a, b):
