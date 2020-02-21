@@ -27,6 +27,12 @@ The results are best if we have good lighting and plain background, but it shoul
 
 # In use
 
-Blue             |  Red
+|
 :-------------------------:|:-------------------------:
 ![](https://user-images.githubusercontent.com/56405660/75018019-80ba3e80-548e-11ea-807a-8febea18df7d.jpg)  |  ![](https://user-images.githubusercontent.com/56405660/75018046-8e6fc400-548e-11ea-8452-ddad3e3d778b.jpg)
+
+## Voice commands
+* Color: *"change color"*, *"switch color"*, *"red"*, *"blue"*, *"green"*
+* Sound: *"change sound"*, *"switch sound"*, *"piano"*, *"organ"*, *"flute"*
+
+If the command is successful, you will head a sound effect.
