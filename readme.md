@@ -19,6 +19,8 @@ Python modules required:
 
 When everything is installed, we can run the program using:
 
+```
 python main.py
+```
 
 The results are best if we have good lighting and plain background, but it should work good even if the latter requirement is not satisfied.
